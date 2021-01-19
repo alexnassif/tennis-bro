@@ -38,6 +38,6 @@ func DbURL(dbConfig *DBConfig) string {
    }
 
 func Close() {
-	sqlDB, _ := DB.DB()
-	sqlDB.Close()
+	tbDB, _ := DB.DB()
+	tbDB.Close()
 }

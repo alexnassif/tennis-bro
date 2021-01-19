@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 	fmt.Println("Status:", err)
 	}
-	//defer Config.Close()
+	defer Config.Close()
 	Config.DB.AutoMigrate(&Models.User{})
 	r := Routes.SetupRouter()
 	//running
