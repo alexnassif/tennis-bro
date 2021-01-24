@@ -4,9 +4,8 @@ import (
  "github.com/alexnassif/tennis-bro/Models"
  "github.com/alexnassif/tennis-bro/Routes"
  "fmt"
-
-"gorm.io/driver/postgres"
-"gorm.io/gorm"
+ "gorm.io/driver/postgres"
+ "gorm.io/gorm"
 )
 var err error
 func main() {

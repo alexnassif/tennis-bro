@@ -5,11 +5,12 @@ import ("gorm.io/gorm")
 type User struct {
 	gorm.Model
 	UserName string
-	Latitute float64
+	Latitude float64
 	Longitude float64
 	Email string
-	Level string
+	Level float64
 	Image string
 	Bio string
+	Password string
 }
 
