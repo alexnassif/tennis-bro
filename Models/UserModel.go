@@ -6,13 +6,13 @@ import (
 
 type User struct {
 	gorm.Model
-	UserName string
-	Email    string
-	Location Location    `gorm:"embedded"`
-	Level    PlayerLevel `gorm:"embedded"`
-	Image    string
-	Bio      string
-	Password string
+	UserName string `json:"user_name"`
+	Email    string `json:"email"`
+	Location Location    `gorm:"embedded" json:"location"`
+	Level    PlayerLevel `gorm:"embedded" json:"level"`
+	Image    string `json:"image"`
+	Bio      string `json:"bio"`
+	Password string `json:"password"`
 }
 
 type PlayerLevel struct {
@@ -21,6 +21,6 @@ type PlayerLevel struct {
 }
 
 type Location struct {
-	Latitude  float64
-	Longitude float64
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }

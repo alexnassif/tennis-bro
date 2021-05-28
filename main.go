@@ -6,6 +6,7 @@ import (
 	"github.com/alexnassif/tennis-bro/Config"
 	"github.com/alexnassif/tennis-bro/Models"
 	"github.com/alexnassif/tennis-bro/Routes"
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -22,5 +23,16 @@ func main() {
 	Config.DB.AutoMigrate(&Models.User{})
 	r := Routes.SetupRouter()
 	//running
+	wsServer := NewWebsocketServer()
+	go wsServer.Run()
+	r.LoadHTMLFiles("index.html")
+
+	r.GET("/room/", func(c *gin.Context) {
+		c.HTML(200, "index.html", nil)
+	})
+
+	r.GET("/ws", func(c *gin.Context) {
+		ServeWs(wsServer, c.Writer, c.Request)
+	})
 	r.Run()
 }

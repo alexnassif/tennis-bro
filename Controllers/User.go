@@ -28,7 +28,7 @@ func CreateUser(c *gin.Context) {
 	} else {
 	 c.JSON(http.StatusOK, user)
 	}
-   }
+}
    
 
 //GetUserByID ... Get the user by id
@@ -41,9 +41,9 @@ func GetUserByID(c *gin.Context) {
 	} else {
 	 c.JSON(http.StatusOK, user)
 	}
-   }
+}
    //UpdateUser ... Update the user information
-   func UpdateUser(c *gin.Context) {
+func UpdateUser(c *gin.Context) {
 	var user Models.User
 	id := c.Params.ByName("id")
 	err := Models.GetUserByID(&user, id)
@@ -57,9 +57,9 @@ func GetUserByID(c *gin.Context) {
 	} else {
 	 c.JSON(http.StatusOK, user)
 	}
-   }
+}
    //DeleteUser ... Delete the user
-   func DeleteUser(c *gin.Context) {
+func DeleteUser(c *gin.Context) {
 	var user Models.User
 	id := c.Params.ByName("id")
 	err := Models.DeleteUser(&user, id)
@@ -68,4 +68,4 @@ func GetUserByID(c *gin.Context) {
 	} else {
 	 c.JSON(http.StatusOK, gin.H{"id" + id: "is deleted"})
 	}
-   }
+}
