@@ -28,6 +28,9 @@ const (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
+    CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 var (
@@ -171,6 +174,7 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 
     // Attach the client object as the sender of the messsage.
     message.Sender = client
+    //fmt.Print(string(jsonMessage))
 
     switch message.Action {
     case SendMessageAction:

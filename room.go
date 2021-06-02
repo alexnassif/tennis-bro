@@ -18,6 +18,7 @@ type Room struct {
 
 //create a new Room
 func NewRoom(name string, private bool) *Room {
+	fmt.Print(name)
 	return &Room{
 		ID: uuid.New(),
 		Name: name,
