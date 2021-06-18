@@ -1,13 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
-	"encoding/json"
-	"github.com/gorilla/websocket"
+
+	"github.com/alexnassif/tennis-bro/Models"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -248,7 +250,7 @@ func (client *Client) handleJoinRoomPrivateMessage(message Message) {
 // New method
 // Joining a room both for public and private roooms
 // When joiing a private room a sender is passed as the opposing party
-func (client *Client) joinRoom(roomName string, sender *Client) {
+func (client *Client) joinRoom(roomName string, sender Models.Profile) {
 
     room := client.wsServer.findRoomByName(roomName)
     if room == nil {
@@ -279,7 +281,7 @@ func (client *Client) isInRoom(room *Room) bool {
 
 // New method
 // Notify the client of the new room he/she joined
-func (client *Client) notifyRoomJoined(room *Room, sender *Client) {
+func (client *Client) notifyRoomJoined(room *Room, sender Models.Profile) {
     message := Message{
         Action: RoomJoinedAction,
         Target: room,
@@ -287,5 +289,9 @@ func (client *Client) notifyRoomJoined(room *Room, sender *Client) {
     }
 
     client.send <- message.encode()
+}
+
+func (client *Client) GetId() string {
+    return client.ID.String()
 }
 

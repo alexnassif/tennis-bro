@@ -24,3 +24,16 @@ type Location struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }
+
+type Profile interface {
+	GetId() string
+	GetName() string
+}
+
+func (user *User) GetId() string {
+    return string(user.ID)
+}
+
+func (user *User) GetName() string {
+    return user.UserName
+}

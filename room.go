@@ -80,3 +80,7 @@ func (room *Room) GetId() string {
 func (room *Room) GetName() string {
 	return room.Name
 }
+
+func (room *Room) GetPrivate() bool {
+    return room.Private
+}

@@ -7,8 +7,10 @@ import (
 //GetAllUsers Fetch all user data
 func GetAllUsers(users *[]User) (err error) {
  if err = Config.DB.Find(users).Error; err != nil {
+    
   return err
  }
+ 
  return nil
 }
 //CreateUser ... Insert New data

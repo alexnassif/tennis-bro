@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/alexnassif/tennis-bro/Models"
+)
 
 //import "golang.org/x/text/message"
 
@@ -10,17 +14,23 @@ type WsServer struct {
 	unregister chan *Client
 	broadcast  chan []byte
 	rooms map[*Room]bool
+	users *[]Models.User
 }
 
 // NewWebsocketServer creates a new WsServer type
 func NewWebsocketServer() *WsServer {
-	return &WsServer{
+	wsServer := &WsServer{
 		clients:    make(map[*Client]bool),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		broadcast:  make(chan []byte),
 		rooms: make(map[*Room]bool),
 	}
+	var users []Models.User
+	wsServer.users = &users
+	Models.GetAllUsers(wsServer.users)
+	return wsServer
+
 }
 
 func (server *WsServer) Run() {
