@@ -16,10 +16,10 @@ const JoinRoomPrivateAction = "join-room-private"
 const RoomJoinedAction = "room-joined"
 
 type Message struct {
-	Action  string         `json:"action"`
-	Message string         `json:"message"`
-	Target  *Room          `json:"target"`
-	Sender  Models.Profile `json:"sender"`
+	Action  string            `json:"action"`
+	Message string            `json:"message"`
+	Target  *Room             `json:"target"`
+	Sender  Models.OnlineUser `json:"sender"`
 }
 
 func (message *Message) encode() []byte {

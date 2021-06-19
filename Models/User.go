@@ -38,3 +38,24 @@ func DeleteUser(user *User, id string) (err error) {
  Config.DB.Where("id = ?", id).Delete(user)
  return nil
 }
+
+func AddOnlineClient(user *OnlineClient)(err error){
+    if err = Config.DB.Select("ID", "UserName").Create(&user).Error; err != nil {
+        return err
+       }
+       return nil
+}
+
+func GetAllOnlineUsers(users *[]OnlineClient) (err error) {
+    if err = Config.DB.Find(&users).Error; err != nil {
+        return err
+    }
+    return nil
+}
+
+func RemoveOnlineUser(user *OnlineClient) (err error) {
+
+    Config.DB.Where("id = ?", user.GetId()).Delete(user)
+    return nil
+
+}

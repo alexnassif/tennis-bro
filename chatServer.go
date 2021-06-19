@@ -13,8 +13,8 @@ type WsServer struct {
 	register   chan *Client
 	unregister chan *Client
 	broadcast  chan []byte
-	rooms map[*Room]bool
-	users *[]Models.User
+	rooms      map[*Room]bool
+	users      *[]Models.OnlineClient
 }
 
 // NewWebsocketServer creates a new WsServer type
@@ -24,13 +24,13 @@ func NewWebsocketServer() *WsServer {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		broadcast:  make(chan []byte),
-		rooms: make(map[*Room]bool),
+		rooms:      make(map[*Room]bool),
 	}
-	var users []Models.User
+	var users []Models.OnlineClient
 	wsServer.users = &users
-	Models.GetAllUsers(wsServer.users)
+	Models.GetAllOnlineUsers(wsServer.users)
+	
 	return wsServer
-
 }
 
 func (server *WsServer) Run() {
@@ -49,6 +49,10 @@ func (server *WsServer) Run() {
 }
 
 func (server *WsServer) registerClient(client *Client) {
+	//add user to online table
+	fmt.Print("adding online user")
+	onlineUser := Models.OnlineClient{ID: client.User.GetId(), UserName: client.User.GetName()}
+	Models.AddOnlineClient(&onlineUser)
 	server.notifyClientJoined(client)
 	server.listOnlineClients(client)
 	server.clients[client] = true
@@ -58,6 +62,8 @@ func (server *WsServer) unregisterClient(client *Client) {
 	if _, ok := server.clients[client]; ok {
 		delete(server.clients, client)
 		server.notifyClientLeft(client)
+		onlineUser := Models.OnlineClient{ID: client.User.GetId(), UserName: client.User.GetName()}
+		Models.RemoveOnlineUser(&onlineUser)
 	}
 }
 
@@ -80,7 +86,7 @@ func (server *WsServer) findRoomByName(name string) *Room {
 	return foundRoom
 }
 
-func (server *WsServer) createRoom (name string, private bool) *Room {
+func (server *WsServer) createRoom(name string, private bool) *Room {
 	room := NewRoom(name, private)
 	go room.RunRoom()
 	server.rooms[room] = true
@@ -88,8 +94,7 @@ func (server *WsServer) createRoom (name string, private bool) *Room {
 	return room
 }
 
-
-func(server *WsServer) notifyClientJoined(client *Client) {
+func (server *WsServer) notifyClientJoined(client *Client) {
 	message := &Message{
 		Action: UserJoinedAction,
 		Sender: client,
@@ -97,46 +102,47 @@ func(server *WsServer) notifyClientJoined(client *Client) {
 	server.broadcastToClients(message.encode())
 }
 
-func(server *WsServer) notifyClientLeft(client *Client){
+func (server *WsServer) notifyClientLeft(client *Client) {
 	message := &Message{
 
 		Action: UserLeftAction,
 		Sender: client,
-
 	}
 	server.broadcastToClients(message.encode())
 }
 
-func(server *WsServer) listOnlineClients(client *Client){
-	for existingClient := range server.clients {
+func (server *WsServer) listOnlineClients(client *Client) {
+
+
+	for _, user := range *server.users {
 		message := &Message{
-			Action: UserJoinedAction,
-			Sender: existingClient,
+		  Action: UserJoinedAction,
+		  Sender: &user,
 		}
 		client.send <- message.encode()
-	}
+	  }
 }
 
 func (server *WsServer) findRoomByID(ID string) *Room {
-    var foundRoom *Room
-    for room := range server.rooms {
-        if room.GetId() == ID {
-            foundRoom = room
-            break
-        }
-    }
+	var foundRoom *Room
+	for room := range server.rooms {
+		if room.GetId() == ID {
+			foundRoom = room
+			break
+		}
+	}
 
-    return foundRoom
+	return foundRoom
 }
 
 func (server *WsServer) findClientByID(ID string) *Client {
-    var foundClient *Client
-    for client := range server.clients {
-        if client.ID.String() == ID {
-            foundClient = client
-            break
-        }
-    }
+	var foundClient *Client
+	for client := range server.clients {
+		if client.ID.String() == ID {
+			foundClient = client
+			break
+		}
+	}
 
-    return foundClient
+	return foundClient
 }

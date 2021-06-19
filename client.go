@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+    "strings"
 
 	"github.com/alexnassif/tennis-bro/Models"
 	"github.com/google/uuid"
@@ -49,9 +50,10 @@ type Client struct {
 	send     chan []byte
 	rooms map[*Room]bool
 	Name string `json:"name"`
+    User Models.User
 }
 
-func newClient(conn *websocket.Conn, wsServer *WsServer, name string) *Client {
+func newClient(conn *websocket.Conn, wsServer *WsServer, name string, user Models.User) *Client {
 	return &Client{
 		ID: uuid.New(),
 		conn: conn,
@@ -59,18 +61,25 @@ func newClient(conn *websocket.Conn, wsServer *WsServer, name string) *Client {
 		send:     make(chan []byte, 256),
 		rooms: make(map[*Room]bool),
 		Name: name,
+        User: user,
 	}
 }
 
 // ServeWs handles websocket requests from clients requests.
 func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
 
-	name, ok := r.URL.Query()["name"]
+	name, ok := r.URL.Query()["id"]
 
     if !ok || len(name[0]) < 1 {
         log.Println("Url Param 'name' is missing")
         return
     }
+
+    var user Models.User
+		err := Models.GetUserByID(&user, strings.Join(name, ""))
+		if err != nil {
+			fmt.Println("no user with that id")
+		}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 
@@ -79,7 +88,7 @@ func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := newClient(conn, wsServer, name[0])
+	client := newClient(conn, wsServer, user.UserName, user)
 
 	go client.writePump()
 	go client.readPump()
@@ -201,12 +210,6 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 	
 }
 
-
-func (client *Client) GetName() string {
-    return client.Name
-}
-
-
 // Refactored method
 // Use new joinRoom method
 func (client *Client) handleJoinRoomMessage(message Message) {
@@ -250,7 +253,7 @@ func (client *Client) handleJoinRoomPrivateMessage(message Message) {
 // New method
 // Joining a room both for public and private roooms
 // When joiing a private room a sender is passed as the opposing party
-func (client *Client) joinRoom(roomName string, sender Models.Profile) {
+func (client *Client) joinRoom(roomName string, sender Models.OnlineUser) {
 
     room := client.wsServer.findRoomByName(roomName)
     if room == nil {
@@ -281,7 +284,7 @@ func (client *Client) isInRoom(room *Room) bool {
 
 // New method
 // Notify the client of the new room he/she joined
-func (client *Client) notifyRoomJoined(room *Room, sender Models.Profile) {
+func (client *Client) notifyRoomJoined(room *Room, sender Models.OnlineUser) {
     message := Message{
         Action: RoomJoinedAction,
         Target: room,
@@ -293,5 +296,9 @@ func (client *Client) notifyRoomJoined(room *Room, sender Models.Profile) {
 
 func (client *Client) GetId() string {
     return client.ID.String()
+}
+
+func (client *Client) GetName() string {
+    return client.Name
 }
 
