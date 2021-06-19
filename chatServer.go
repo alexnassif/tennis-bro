@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/alexnassif/tennis-bro/Models"
+	"github.com/google/uuid"
 )
 
 //import "golang.org/x/text/message"
@@ -29,7 +30,7 @@ func NewWebsocketServer() *WsServer {
 	var users []Models.OnlineClient
 	wsServer.users = &users
 	Models.GetAllOnlineUsers(wsServer.users)
-	
+
 	return wsServer
 }
 
@@ -83,11 +84,33 @@ func (server *WsServer) findRoomByName(name string) *Room {
 			break
 		}
 	}
+
+	if foundRoom == nil {
+		foundRoom = server.runRoomFromRepository(name)
+	}
+
 	return foundRoom
+}
+
+func (server *WsServer) runRoomFromRepository(name string) *Room {
+	var room Models.Room
+	var newRoom *Room
+	err := Models.FindRoomByName(&room, name)
+	if err == nil {
+		newRoom = NewRoom(room.GetName(), room.GetPrivate())
+		newRoom.ID, _ = uuid.Parse(room.GetId())
+		go newRoom.RunRoom()
+		server.rooms[newRoom] = true
+
+	}
+	return newRoom
 }
 
 func (server *WsServer) createRoom(name string, private bool) *Room {
 	room := NewRoom(name, private)
+
+	newRoom := Models.Room{Id: room.GetId(), Name: room.GetName(), Private: room.GetPrivate()}
+	Models.AddRoom(&newRoom)
 	go room.RunRoom()
 	server.rooms[room] = true
 
@@ -113,14 +136,13 @@ func (server *WsServer) notifyClientLeft(client *Client) {
 
 func (server *WsServer) listOnlineClients(client *Client) {
 
-
 	for _, user := range *server.users {
 		message := &Message{
-		  Action: UserJoinedAction,
-		  Sender: &user,
+			Action: UserJoinedAction,
+			Sender: &user,
 		}
 		client.send <- message.encode()
-	  }
+	}
 }
 
 func (server *WsServer) findRoomByID(ID string) *Room {
