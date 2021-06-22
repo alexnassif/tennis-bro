@@ -1,12 +1,12 @@
 package Models
 
 type Room struct {
-	Id string
-	Name string
+	Id      string
+	Name    string
 	Private bool
 }
 
-func(room *Room) GetId() string{
+func (room *Room) GetId() string {
 	return room.Id
 }
 
@@ -16,4 +16,4 @@ func (room *Room) GetName() string {
 
 func (room *Room) GetPrivate() bool {
 	return room.Private
-} 
+}

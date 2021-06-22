@@ -3,8 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/alexnassif/tennis-bro/Config"
+	"log"
+	"context"
 )
 const welcomeMessage = "%s joined the room"
+var ctx = context.Background()
+
 type Room struct {
 
 	ID 			uuid.UUID `json:"id"`
@@ -32,14 +37,18 @@ func NewRoom(name string, private bool) *Room {
 
 //run room, accept various requests
 func (room *Room) RunRoom(){
+
+	go room.suscribeToRoomMessages()
 	for{
 		select{
 		case client := <-room.register:
 			room.registerClientInRoom(client)
 		case client := <-room.unregister:
 			room.unregisterClientInRoom(client)
-		case message := <-room.broadcast:
-			room.broadcastToClientsInRoom(message.encode())
+		/*case message := <-room.broadcast:
+			room.broadcastToClientsInRoom(message.encode())*/
+		case message := <- room.broadcast:
+			room.publishRoomMessage(message.encode())
 		}
 	}
 }
@@ -70,7 +79,8 @@ func (room *Room) notifyClientJoined(client *Client) {
 		Message: fmt.Sprintf(welcomeMessage, client.GetName()),
 	}
 
-	room.broadcastToClientsInRoom(message.encode())
+	//room.broadcastToClientsInRoom(message.encode())
+	room.publishRoomMessage(message.encode())
 }
 
 func (room *Room) GetId() string {
@@ -84,3 +94,23 @@ func (room *Room) GetName() string {
 func (room *Room) GetPrivate() bool {
     return room.Private
 }
+
+func (room *Room) publishRoomMessage(message []byte) {
+	err := Config.Redis.Publish(ctx, room.GetName(), message).Err()
+
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (room *Room) suscribeToRoomMessages() {
+	pubsub := Config.Redis.Subscribe(ctx, room.GetName())
+
+	ch := pubsub.Channel()
+
+	for msg := range ch {
+		room.broadcastToClientsInRoom([]byte(msg.Payload))
+	}
+}
+
+

@@ -5,9 +5,15 @@ import (
 
 	"github.com/alexnassif/tennis-bro/Models"
 	"github.com/google/uuid"
+
+	"encoding/json"
+    "log"
+	"github.com/alexnassif/tennis-bro/Config"
 )
 
 //import "golang.org/x/text/message"
+
+const PubSubGeneralChannel = "general"
 
 type WsServer struct {
 	clients    map[*Client]bool
@@ -15,7 +21,7 @@ type WsServer struct {
 	unregister chan *Client
 	broadcast  chan []byte
 	rooms      map[*Room]bool
-	users      *[]Models.OnlineClient
+	users      []Models.OnlineUser
 }
 
 // NewWebsocketServer creates a new WsServer type
@@ -28,13 +34,19 @@ func NewWebsocketServer() *WsServer {
 		rooms:      make(map[*Room]bool),
 	}
 	var users []Models.OnlineClient
-	wsServer.users = &users
-	Models.GetAllOnlineUsers(wsServer.users)
+	
+	Models.GetAllOnlineUsers(&users)
 
+	wsServer.users = make([]Models.OnlineUser, 0)
+
+	for _, val := range users {
+		wsServer.users = append(wsServer.users, &val)
+	}
 	return wsServer
 }
 
 func (server *WsServer) Run() {
+	go server.listenPubSubChannel()
 	for {
 		select {
 		case client := <-server.register:
@@ -54,7 +66,10 @@ func (server *WsServer) registerClient(client *Client) {
 	fmt.Print("adding online user")
 	onlineUser := Models.OnlineClient{ID: client.User.GetId(), UserName: client.User.GetName()}
 	Models.AddOnlineClient(&onlineUser)
-	server.notifyClientJoined(client)
+	//server.notifyClientJoined(client)
+	
+	server.publishClientJoined(client)
+
 	server.listOnlineClients(client)
 	server.clients[client] = true
 }
@@ -65,6 +80,8 @@ func (server *WsServer) unregisterClient(client *Client) {
 		server.notifyClientLeft(client)
 		onlineUser := Models.OnlineClient{ID: client.User.GetId(), UserName: client.User.GetName()}
 		Models.RemoveOnlineUser(&onlineUser)
+
+		server.publishClientLeft(client)
 	}
 }
 
@@ -136,10 +153,10 @@ func (server *WsServer) notifyClientLeft(client *Client) {
 
 func (server *WsServer) listOnlineClients(client *Client) {
 
-	for _, user := range *server.users {
+	for _, user := range server.users {
 		message := &Message{
 			Action: UserJoinedAction,
-			Sender: &user,
+			Sender: user,
 		}
 		client.send <- message.encode()
 	}
@@ -167,4 +184,92 @@ func (server *WsServer) findClientByID(ID string) *Client {
 	}
 
 	return foundClient
+}
+
+// Publish userJoined message in pub/sub
+func (server *WsServer) publishClientJoined(client *Client) {
+
+    message := &Message{
+        Action: UserJoinedAction,
+        Sender: client,
+    }
+
+    if err := Config.Redis.Publish(ctx, PubSubGeneralChannel, message.encode()).Err(); err != nil {
+        log.Println(err)
+    }
+}
+
+// Publish userleft message in pub/sub
+func (server *WsServer) publishClientLeft(client *Client) {
+
+    message := &Message{
+        Action: UserLeftAction,
+        Sender: client,
+    }
+
+    if err := Config.Redis.Publish(ctx, PubSubGeneralChannel, message.encode()).Err(); err != nil {
+        log.Println(err)
+    }
+}
+
+// Listen to pub/sub general channels
+func (server *WsServer) listenPubSubChannel() {
+
+    pubsub := Config.Redis.Subscribe(ctx, PubSubGeneralChannel)
+    ch := pubsub.Channel()
+    for msg := range ch {
+
+        var message Message
+        if err := json.Unmarshal([]byte(msg.Payload), &message); err != nil {
+            log.Printf("Error on unmarshal JSON message %s", err)
+            return
+        }
+
+        switch message.Action {
+        case UserJoinedAction:
+            server.handleUserJoined(message)
+        case UserLeftAction:
+            server.handleUserLeft(message)  
+		case JoinRoomPrivateAction:
+            server.handleUserJoinPrivate(message)    
+        }
+    }
+}
+
+func (server *WsServer) handleUserJoined(message Message) {
+    // Add the user to the slice
+    server.users = append(server.users, message.Sender)
+    server.broadcastToClients(message.encode())
+}
+
+func (server *WsServer) handleUserLeft(message Message) {
+    // Remove the user from the slice
+    for i, user := range server.users {
+        if user.GetId() == message.Sender.GetId() {
+            server.users[i] = server.users[len(server.users)-1]
+            server.users = server.users[:len(server.users)-1]
+        }
+    }
+    server.broadcastToClients(message.encode())
+}
+
+func (server *WsServer) handleUserJoinPrivate(message Message) {
+    // Find client for given user, if found add the user to the room.
+    targetClient := server.findClientByID(message.Message)
+    if targetClient != nil {
+        targetClient.joinRoom(message.Target.GetName(), message.Sender)
+    }
+}
+
+// Add the findUserByID method used by client.go
+func (server *WsServer) findUserByID(ID string) Models.OnlineUser {
+    var foundUser Models.OnlineUser
+    for _, client := range server.users {
+        if client.GetId() == ID {
+            foundUser = client
+            break
+        }
+    }
+
+    return foundUser
 }

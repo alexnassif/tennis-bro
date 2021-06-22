@@ -9,6 +9,7 @@ import (
     "strings"
 
 	"github.com/alexnassif/tennis-bro/Models"
+    "github.com/alexnassif/tennis-bro/Config"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -237,7 +238,7 @@ func (client *Client) handleLeaveRoomMessage(message Message) {
 // Then we will bothe join the client and the target.
 func (client *Client) handleJoinRoomPrivateMessage(message Message) {
 
-    target := client.wsServer.findClientByID(message.Message)
+    target := client.wsServer.findUserByID(message.Message)
     if target == nil {
         return
     }
@@ -245,15 +246,29 @@ func (client *Client) handleJoinRoomPrivateMessage(message Message) {
     // create unique room name combined to the two IDs
     roomName := message.Message + client.ID.String()
 
-    client.joinRoom(roomName, target)
-    target.joinRoom(roomName, client)
-
+    joinedRoom := client.joinRoom(roomName, target)
+    //target.joinRoom(roomName, client)
+    if joinedRoom != nil {
+        client.inviteTargetUser(target, joinedRoom)
+    }
 }
+// Send out invite message over pub/sub in the general channel.
+func (client *Client) inviteTargetUser(target Models.OnlineUser, room *Room) {
+    inviteMessage := &Message{
+        Action: JoinRoomPrivateAction,
+        Message: target.GetId(),
+        Target: room,
+        Sender: client,
+    }
 
+    if err := Config.Redis.Publish(ctx, PubSubGeneralChannel, inviteMessage.encode()).Err(); err != nil {
+        log.Println(err)
+    }
+}
 // New method
 // Joining a room both for public and private roooms
 // When joiing a private room a sender is passed as the opposing party
-func (client *Client) joinRoom(roomName string, sender Models.OnlineUser) {
+func (client *Client) joinRoom(roomName string, sender Models.OnlineUser) *Room {
 
     room := client.wsServer.findRoomByName(roomName)
     if room == nil {
@@ -262,7 +277,7 @@ func (client *Client) joinRoom(roomName string, sender Models.OnlineUser) {
 
     // Don't allow to join private rooms through public room message
     if sender == nil && room.Private {
-        return
+        return nil
     }
 
     if !client.isInRoom(room) {
@@ -270,7 +285,7 @@ func (client *Client) joinRoom(roomName string, sender Models.OnlineUser) {
         room.register <- client
         client.notifyRoomJoined(room, sender)
     }
-
+    return room
 }
 
 // New method

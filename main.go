@@ -25,6 +25,8 @@ func main() {
 	//running
 	wsServer := NewWebsocketServer()
 	go wsServer.Run()
+
+	Config.CreateRedisClient()
 	r.LoadHTMLFiles("index.html")
 
 	r.GET("/room/", func(c *gin.Context) {

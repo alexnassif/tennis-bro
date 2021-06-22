@@ -4,13 +4,18 @@ go 1.14
 
 require (
 	github.com/gin-gonic/gin v1.6.3
-	github.com/google/uuid v1.2.0 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/jinzhu/gorm v1.9.16
-	github.com/qor/auth v0.0.0-20200821034127-11d4c974507d
-	github.com/qor/session v0.0.0-20170907035918-8206b0adab70
+	github.com/go-redis/redis/v8 v8.10.0 // indirect
+	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/google/uuid v1.2.0
+	github.com/gorilla/websocket v1.4.2
+	github.com/lib/pq v1.8.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
-	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd // indirect
+	github.com/stretchr/testify v1.7.0 // indirect
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
+	golang.org/x/sys v0.0.0-20210112080510-489259a85091 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gorm.io/driver/postgres v1.0.6
 	gorm.io/gorm v1.20.8
 )
