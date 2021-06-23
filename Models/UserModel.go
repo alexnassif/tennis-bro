@@ -43,6 +43,8 @@ type OnlineUser interface {
 type OnlineClient struct {
 	ID       string `json:"id"`
 	UserName string `json:"name"`
+	UserID   int
+	User     User
 }
 
 func (user *OnlineClient) GetId() string {
