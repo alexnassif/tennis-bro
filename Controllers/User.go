@@ -8,6 +8,7 @@ import(
 )
 
 func GetUsers(c *gin.Context){
+	c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
 	var user []Models.User
 	err := Models.GetAllUsers(&user)
 	if err != nil {
