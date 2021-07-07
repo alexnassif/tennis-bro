@@ -20,7 +20,7 @@ func main() {
 		fmt.Println("Status:", err)
 	}
 	defer Config.Close()
-	Config.DB.AutoMigrate(&Models.User{}, &Models.OnlineClient{}, &Models.Room{}, &Models.Message{},&Models.Dialogs{})
+	Config.DB.AutoMigrate(&Models.User{}, &Models.OnlineClient{}, &Models.Room{}, &Models.Message{},)
 	r := Routes.SetupRouter()
 	//running
 	wsServer := NewWebsocketServer()

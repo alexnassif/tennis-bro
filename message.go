@@ -14,12 +14,14 @@ const UserJoinedAction = "user-join"
 const UserLeftAction = "user-left"
 const JoinRoomPrivateAction = "join-room-private"
 const RoomJoinedAction = "room-joined"
+const PrivateMessage = "private-message"
 
 type Message struct {
-	Action  string            `json:"action"`
-	Message string            `json:"message"`
-	Target  *Room             `json:"target"`
-	Sender  Models.OnlineUser `json:"sender"`
+	Action   string            `json:"action"`
+	Message  string            `json:"message"`
+	Target   *Room             `json:"target"`
+	Sender   Models.OnlineUser `json:"sender"`
+	Receiver int            `json:"receiver"`
 }
 
 func (message *Message) encode() []byte {
