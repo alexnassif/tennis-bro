@@ -97,7 +97,6 @@ func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
 	wsServer.register <- client
 
 	fmt.Println("New Client joined the hub!")
-	fmt.Println(client)
 }
 
 func (client *Client) readPump() {
@@ -243,9 +242,9 @@ func (client *Client) handlePrivateMessage(message Message) {
 	newMessage := Models.Message{Sender: client.User, Recipient: user, Body: message.Message}
 	Config.DB.Create(&newMessage)
 
-	if onlineUser == nil {
-
-		client.sendTargetUserMessage(onlineUser, joinedRoom)
+	fmt.Println(joinedRoom.GetName() + " client " + fmt.Sprint(client.User.ID))
+	if onlineUser != nil{
+	fmt.Println(onlineUser.GetName())
 	}
 }
 
@@ -388,4 +387,8 @@ func (client *Client) GetId() string {
 
 func (client *Client) GetName() string {
 	return client.Name
+}
+
+func (client *Client) GetUser() Models.User {
+	return client.User
 }

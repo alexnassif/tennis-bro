@@ -38,6 +38,7 @@ func (user *User) GetName() string {
 type OnlineUser interface {
 	GetId() string
 	GetName() string
+	GetUser() User
 }
 
 type OnlineClient struct {
@@ -53,4 +54,7 @@ func (user *OnlineClient) GetId() string {
 
 func (user *OnlineClient) GetName() string {
 	return user.UserName
+}
+func (user *OnlineClient) GetUser() User {
+	return user.User
 }
