@@ -115,7 +115,7 @@ func (server *WsServer) runRoomFromRepository(name string) *Room {
 	err := Models.FindRoomByName(&room, name)
 	if err == nil {
 		newRoom = NewRoom(room.GetName(), room.GetPrivate())
-		newRoom.ID, _ = uuid.Parse(room.GetId())
+		newRoom.ID, _ = uuid.Parse(fmt.Sprint(room.GetId()))
 		go newRoom.RunRoom()
 		server.rooms[newRoom] = true
 
@@ -126,8 +126,16 @@ func (server *WsServer) runRoomFromRepository(name string) *Room {
 func (server *WsServer) createRoom(name string, private bool) *Room {
 	room := NewRoom(name, private)
 
-	newRoom := Models.Room{Id: room.GetId(), Name: room.GetName(), Private: room.GetPrivate()}
+	newRoom := Models.Room{ Name: room.GetName(), Private: room.GetPrivate()}
 	Models.AddRoom(&newRoom)
+	go room.RunRoom()
+	server.rooms[room] = true
+
+	return room
+}
+
+func (server *WsServer) createPrivateRoom(name string, private bool) *Room {
+	room := NewRoom(name, private)
 	go room.RunRoom()
 	server.rooms[room] = true
 
@@ -270,6 +278,10 @@ func (server *WsServer) findUserByID(ID string) Models.OnlineUser {
             break
         }
     }
-
+	fmt.Print("user not found")
     return foundUser
 }
+
+
+
+

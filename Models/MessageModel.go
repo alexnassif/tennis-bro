@@ -1,14 +1,15 @@
 package Models
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type Message struct {
-	ID int
+	gorm.Model
 	SenderID int
 	Sender User `gorm:"foreignKey:SenderID"`
 	RecipientID int
 	Recipient User `gorm:"foreignKey:RecipientID"`
-	CreatedAt time.Time
 	Body string
 }
 

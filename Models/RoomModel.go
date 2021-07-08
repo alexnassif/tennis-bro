@@ -1,7 +1,9 @@
 package Models
 
+import "gorm.io/gorm"
+
 type Room struct {
-	Id      string
+	gorm.Model
 	Name    string
 	Private bool
 	User1ID int 
@@ -10,8 +12,8 @@ type Room struct {
 	User2 User `gorm:"foreignKey:User2ID"`
 }
 
-func (room *Room) GetId() string {
-	return room.Id
+func (room *Room) GetId() uint {
+	return room.ID
 }
 
 func (room *Room) GetName() string {

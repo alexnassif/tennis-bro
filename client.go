@@ -219,6 +219,67 @@ func (client *Client) handlePrivateMessage(message Message) {
 	} else {
 		fmt.Println(user.UserName)
 	}
+	var privateRoom Models.Room
+	result := Config.DB.Where("user1_id = ? AND user2_id = ?", user.ID, client.User.ID).Or("user1_id = ? AND user2_id = ?", client.User.ID, user.ID).First(&privateRoom)
+
+	if result.RowsAffected == 0 {
+
+		privateRoom = Models.Room{Name: user.UserName + client.User.UserName, User1: client.User, User2: user, Private: true}
+		err := Config.DB.Create(&privateRoom)
+
+		if err.Error != nil {
+			fmt.Println(err.Error)
+		} else {
+			fmt.Println(privateRoom.ID)
+		}
+	} else {
+		fmt.Println(privateRoom.CreatedAt)
+	}
+
+	joinedRoom := client.joinPrivateRoom(privateRoom.Name, client)
+
+	onlineUser := client.wsServer.findUserByID(fmt.Sprint(user.ID))
+
+	newMessage := Models.Message{Sender: client.User, Recipient: user, Body: message.Message}
+	Config.DB.Create(&newMessage)
+
+	if onlineUser == nil {
+
+		client.sendTargetUserMessage(onlineUser, joinedRoom)
+	}
+}
+
+func (client *Client) joinPrivateRoom(roomName string, sender Models.OnlineUser) *Room {
+
+	room := client.wsServer.findRoomByName(roomName)
+	if room == nil {
+		room = client.wsServer.createPrivateRoom(roomName, sender != nil)
+	}
+
+	// Don't allow to join private rooms through public room message
+	if sender == nil && room.Private {
+		return nil
+	}
+
+	if !client.isInRoom(room) {
+		client.rooms[room] = true
+		room.register <- client
+	}
+	return room
+}
+
+// Send out invite message over pub/sub in the general channel.
+func (client *Client) sendTargetUserMessage(target Models.OnlineUser, room *Room) {
+	inviteMessage := &Message{
+		Action:  PrivateMessage,
+		Message: target.GetId(),
+		Target:  room,
+		Sender:  client,
+	}
+
+	if err := Config.Redis.Publish(ctx, PubSubGeneralChannel, inviteMessage.encode()).Err(); err != nil {
+		log.Println(err)
+	}
 }
 
 // Refactored method
