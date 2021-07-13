@@ -90,6 +90,7 @@ func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := newClient(conn, wsServer, user.UserName, user)
+	client.joinPrivateRoom(user.GetId(), client)
 
 	go client.writePump()
 	go client.readPump()
@@ -235,17 +236,11 @@ func (client *Client) handlePrivateMessage(message Message) {
 		fmt.Println(privateRoom.CreatedAt)
 	}
 
-	joinedRoom := client.joinPrivateRoom(privateRoom.Name, client)
-
-	onlineUser := client.wsServer.findUserByID(fmt.Sprint(user.ID))
-
 	newMessage := Models.Message{Sender: client.User, Recipient: user, Body: message.Message}
 	Config.DB.Create(&newMessage)
 
-	fmt.Println(joinedRoom.GetName() + " client " + fmt.Sprint(client.User.ID))
-	if onlineUser != nil{
-	fmt.Println(onlineUser.GetName())
-	}
+	//find room by id
+	
 }
 
 func (client *Client) joinPrivateRoom(roomName string, sender Models.OnlineUser) *Room {
