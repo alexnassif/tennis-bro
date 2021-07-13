@@ -16,6 +16,11 @@ func SetupRouter() *gin.Engine {
 		userGroup.PUT("user/:id", Controllers.UpdateUser)
 		userGroup.DELETE("user/:id", Controllers.DeleteUser)
 	}
+
+	roomGroup := r.Group("/room-api")
+	{
+		roomGroup.GET("rooms/:id", Controllers.GetRoomsForUser)
+	}
 	return r
 }
 

@@ -211,7 +211,6 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 }
 
 func (client *Client) handlePrivateMessage(message Message) {
-	fmt.Println(message.Receiver)
 	var user Models.User
 	err := Models.GetUserByID(&user, fmt.Sprint(message.Receiver))
 	if err != nil {
