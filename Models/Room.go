@@ -19,6 +19,7 @@ func FindRoomByName(room *Room, name string) (err error) {
 }
 
 func GetRoomsByUsers(user1_id string, privateRoom *[]Room)(err error) {
+	
 	if err = Config.DB.Where("user1_id = ?", user1_id).Or("user2_id = ?", user1_id).Find(&privateRoom).Error; err != nil {
 		return err
 	}

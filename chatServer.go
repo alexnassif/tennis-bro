@@ -96,16 +96,13 @@ func (server *WsServer) broadcastToClients(message []byte) {
 
 func (server *WsServer) findRoomByName(name string) *Room {
 	var foundRoom *Room
-
+	fmt.Println("finding room" + name)
 	for room := range server.rooms {
 		if room.GetName() == name {
 			foundRoom = room
+			fmt.Println("break")
 			break
 		}
-	}
-
-	if foundRoom == nil {
-		foundRoom = server.runRoomFromRepository(name)
 	}
 
 	return foundRoom
@@ -140,7 +137,7 @@ func (server *WsServer) createPrivateRoom(name string, private bool) *Room {
 	room := NewRoom(name, private)
 	go room.RunRoom()
 	server.rooms[room] = true
-
+	fmt.Println("created room" + name)
 	return room
 }
 

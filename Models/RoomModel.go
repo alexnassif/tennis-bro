@@ -6,9 +6,9 @@ type Room struct {
 	gorm.Model
 	Name    string
 	Private bool
-	User1ID int 
+	User1ID uint 
 	User1 User `gorm:"foreignKey:User1ID"`
-	User2ID int
+	User2ID uint
 	User2 User `gorm:"foreignKey:User2ID"`
 }
 

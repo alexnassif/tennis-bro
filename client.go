@@ -229,7 +229,7 @@ func (client *Client) handlePrivateMessage(message Message) {
 		if err.Error != nil {
 			fmt.Println(err.Error)
 		} else {
-			fmt.Println(privateRoom.ID)
+			fmt.Println(privateRoom.User1.UserName)
 		}
 	} else {
 		fmt.Println(privateRoom.CreatedAt)
@@ -239,7 +239,7 @@ func (client *Client) handlePrivateMessage(message Message) {
 	Config.DB.Create(&newMessage)
 
 	//find room by id
-	room := client.wsServer.findRoomByName(user.GetId())
+	room := client.wsServer.findRoomByName(client.User.GetId())
 	room.broadcast <- &Message{
 		Action:  PrivateMessage,
 		Message: newMessage.Body,
@@ -251,10 +251,9 @@ func (client *Client) handlePrivateMessage(message Message) {
 
 func (client *Client) joinPrivateRoom(roomName string, sender Models.OnlineUser) *Room {
 
-	room := client.wsServer.findRoomByName(roomName)
-	if room == nil {
-		room = client.wsServer.createPrivateRoom(roomName, sender != nil)
-	}
+	
+	room := client.wsServer.createPrivateRoom(roomName, sender != nil)
+	
 
 	// Don't allow to join private rooms through public room message
 	if sender == nil && room.Private {
