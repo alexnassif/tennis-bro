@@ -239,7 +239,7 @@ func (client *Client) handlePrivateMessage(message Message) {
 	Config.DB.Create(&newMessage)
 
 	//find room by id
-	room := client.wsServer.findRoomByName(client.User.GetId())
+	room := client.wsServer.findRoomByName(user.GetId())
 	room.broadcast <- &Message{
 		Action:  PrivateMessage,
 		Message: newMessage.Body,
