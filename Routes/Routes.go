@@ -21,6 +21,11 @@ func SetupRouter() *gin.Engine {
 	{
 		roomGroup.GET("rooms/:id", Controllers.GetRoomsForUser)
 	}
+
+	messageGroup := r.Group("/message-api")
+	{
+		messageGroup.GET("messages/:sender/:recipient", Controllers.GetMessagesByUserId)
+	}
 	return r
 }
 
