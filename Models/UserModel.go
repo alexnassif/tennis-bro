@@ -5,7 +5,10 @@ import (
 
 	"gorm.io/gorm"
 )
-
+type LoggedInUser interface{
+	GetId() string
+	GetName() string
+}
 type User struct {
 	gorm.Model
 	UserName string      `json:"user_name"`
