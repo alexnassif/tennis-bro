@@ -2,6 +2,7 @@ package Controllers
 
 import(
 	"github.com/alexnassif/tennis-bro/Models"
+	"github.com/alexnassif/tennis-bro/Auth"
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"fmt"
@@ -22,6 +23,8 @@ func GetUsers(c *gin.Context){
 func CreateUser(c *gin.Context) {
 	var user Models.User
 	c.BindJSON(&user)
+	password, _ := Auth.GeneratePassword(user.Password)
+	user.Password = password
 	err := Models.CreateUser(&user)
 	if err != nil {
 	 fmt.Println(err.Error())

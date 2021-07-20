@@ -1,8 +1,9 @@
 package Routes
 
 import (
-	"github.com/alexnassif/tennis-bro/Controllers"
+	
 	"github.com/gin-gonic/gin"
+	"github.com/alexnassif/tennis-bro/Controllers"
 )
 
 func SetupRouter() *gin.Engine {
@@ -28,4 +29,3 @@ func SetupRouter() *gin.Engine {
 	}
 	return r
 }
-
