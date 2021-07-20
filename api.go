@@ -42,14 +42,14 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
     }
 
     // Create a JWT
-    token, err := Auth.CreateJWTToken(dbUser)
+    /*token, err := Auth.CreateJWTToken(dbUser)
 
     if err != nil {
         returnErrorResponse(w)
         return
     }
 
-    w.Write([]byte(token))
+    w.Write([]byte(token))*/
 
 }
 
