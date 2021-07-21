@@ -38,5 +38,10 @@ func main() {
 		ServeWs(wsServer, c.Writer, c.Request)
 
 	})
+
+	r.GET("/api/login", func(c *gin.Context) {
+		HandleLogin(c.Writer, c.Request)
+	})
+	
 	r.Run()
 }

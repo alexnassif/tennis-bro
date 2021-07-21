@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/alexnassif/tennis-bro/Auth"
@@ -26,6 +27,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
         return
     }
 	var dbUser Models.User
+    fmt.Println(loginUser.Username)
     // Find the user in the database by username
     userErr := Models.FindUserByUsername(loginUser.Username, &dbUser)
     if userErr != nil {
