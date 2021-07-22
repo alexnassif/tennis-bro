@@ -39,7 +39,7 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
 
             } else {
                 ctx := context.WithValue(r.Context(), UserContextKey, user)
-                f(c.Writer, r.WithContext(ctx))
+                f(w, r.WithContext(ctx))
             }
 
         } else if nok && len(name) == 1 {
