@@ -1,15 +1,11 @@
 package Auth
 
 import (
-    "context"
     "net/http"
     "github.com/google/uuid"
 	"github.com/gin-gonic/gin"
 )
 
-type contextKey string
-
-const UserContextKey = contextKey("user")
 
 type AnonUser struct {
     Id string `json:"id"`
@@ -38,15 +34,15 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
                 http.Error(w, "Forbidden", http.StatusForbidden)
 
             } else {
-                ctx := context.WithValue(r.Context(), UserContextKey, user)
-                f(w, r.WithContext(ctx))
+                c.Set("user", &user)
+                f(c)
             }
 
         } else if nok && len(name) == 1 {
             // Continue with new Anon. user
             user := AnonUser{Id: uuid.New().String(), Name: name[0]}
-            ctx := context.WithValue(r.Context(), UserContextKey, &user)
-            f(w, r.WithContext(ctx))
+            c.Set("user", &user)
+            f(c)
 
         } else {
             w.WriteHeader(http.StatusBadRequest)
