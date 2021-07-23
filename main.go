@@ -36,7 +36,7 @@ func main() {
 
 	r.GET("/ws", Auth.AuthMiddleware(func(c *gin.Context) {
 
-		ServeWs(wsServer, c.Writer, c.Request)
+		ServeWs(wsServer, c)
 
 	}))
 

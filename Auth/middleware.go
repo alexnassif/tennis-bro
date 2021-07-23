@@ -26,7 +26,7 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
 		r := c.Request
 		w := c.Writer
         token, tok := r.URL.Query()["bearer"]
-        name, nok := r.URL.Query()["name"]
+        name, nok := r.URL.Query()["id"]
 
         if tok && len(token) == 1 {            
             user, err := ValidateToken(token[0])

@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/alexnassif/tennis-bro/Config"
 	"github.com/alexnassif/tennis-bro/Models"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	
 )
 
 const (
@@ -55,8 +54,8 @@ type Client struct {
 	User     Models.User
 }
 
-func newClient(conn *websocket.Conn, wsServer *WsServer, name string, user Models.User) *Client {
-	return &Client{
+func newClient(conn *websocket.Conn, wsServer *WsServer, name string, user Models.User, ID string) *Client {
+	client := &Client{
 		ID:       uuid.New(),
 		conn:     conn,
 		wsServer: wsServer,
@@ -65,32 +64,28 @@ func newClient(conn *websocket.Conn, wsServer *WsServer, name string, user Model
 		Name:     name,
 		User:     user,
 	}
+
+	client.ID, _ = uuid.Parse(ID)
+	return client
 }
 
 // ServeWs handles websocket requests from clients requests.
-func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
-
-	name, ok := r.URL.Query()["id"]
-
-	if !ok || len(name[0]) < 1 {
-		log.Println("Url Param 'name' is missing")
-		return
+func ServeWs(wsServer *WsServer, c *gin.Context) {
+	fmt.Println("we get this far")
+	user, ok := c.Keys["user"].(Models.User)
+	
+	if !ok {
+		fmt.Println("anon user")
 	}
 
-	var user Models.User
-	err := Models.GetUserByID(&user, strings.Join(name, ""))
-	if err != nil {
-		fmt.Println("no user with that id")
-	}
-
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	client := newClient(conn, wsServer, user.UserName, user)
+	client := newClient(conn, wsServer, user.UserName, user, user.GetId())
 	client.joinPrivateRoom(user.GetId(), client)
 
 	go client.writePump()
@@ -247,14 +242,12 @@ func (client *Client) handlePrivateMessage(message Message) {
 		Target:  room,
 		Sender:  client,
 	}
-	
+
 }
 
 func (client *Client) joinPrivateRoom(roomName string, sender Models.OnlineUser) *Room {
 
-	
 	room := client.wsServer.createPrivateRoom(roomName, sender != nil)
-	
 
 	// Don't allow to join private rooms through public room message
 	if sender == nil && room.Private {
