@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"strings"
 )
 
 const (
@@ -72,7 +73,13 @@ func newClient(conn *websocket.Conn, wsServer *WsServer, name string, user Model
 // ServeWs handles websocket requests from clients requests.
 func ServeWs(wsServer *WsServer, c *gin.Context) {
 	fmt.Println("we get this far")
-	user, ok := c.Keys["user"].(Models.User)
+	//user, ok := c.Keys["user"].(Models.User)
+	name, ok := c.Request.URL.Query()["id"]
+	var user Models.User
+	err := Models.GetUserByID(&user, strings.Join(name, ""))
+	if err != nil {
+		fmt.Println("no user with that id")
+	}
 	
 	if !ok {
 		fmt.Println("anon user")
