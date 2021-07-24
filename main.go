@@ -40,7 +40,8 @@ func main() {
 
 	}))
 
-	r.GET("/api/login", func(c *gin.Context) {
+	r.POST("/api/login", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
 		HandleLogin(c.Writer, c.Request)
 	})
 	
