@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"github.com/gin-contrib/cors"
 )
 
 var err error
@@ -23,6 +24,7 @@ func main() {
 	defer Config.Close()
 	Config.DB.AutoMigrate(&Models.User{}, &Models.OnlineClient{}, &Models.Room{}, &Models.Message{},)
 	r := Routes.SetupRouter()
+	r.Use(cors.Default())
 	//running
 	wsServer := NewWebsocketServer()
 	go wsServer.Run()
@@ -41,9 +43,9 @@ func main() {
 	}))
 
 	r.POST("/api/login", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
 		HandleLogin(c.Writer, c.Request)
 	})
+	
 	
 	r.Run()
 }
