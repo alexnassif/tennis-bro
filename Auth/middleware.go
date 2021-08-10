@@ -1,9 +1,11 @@
 package Auth
 
 import (
-    "net/http"
-    "github.com/google/uuid"
+	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 
@@ -40,6 +42,7 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
 
         } else if nok && len(name) == 1 {
             // Continue with new Anon. user
+            fmt.Print("creating anon")
             user := AnonUser{Id: uuid.New().String(), Name: name[0]}
             c.Set("user", &user)
             f(c)
