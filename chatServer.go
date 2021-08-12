@@ -271,7 +271,7 @@ func (server *WsServer) handleUserJoinPrivate(message Message) {
 func (server *WsServer) findUserByID(ID string) Models.OnlineUser {
 	var foundUser Models.OnlineUser
 	for _, client := range server.users {
-		fmt.Println(client)
+		//fmt.Println(client)
 		if client.GetId() == ID {
 			foundUser = client
 			break
