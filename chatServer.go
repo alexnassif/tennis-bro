@@ -41,9 +41,8 @@ func NewWebsocketServer() *WsServer {
 	wsServer.users = make([]Models.OnlineUser, 0)
 	for _, val := range users {
 		wsServer.users = append(wsServer.users, &val)
-		fmt.Println("appending user " + val.GetId())
 	}
-	fmt.Println(len(wsServer.users))
+	
 	return wsServer
 }
 
@@ -89,7 +88,6 @@ func (server *WsServer) unregisterClient(client *Client) {
 
 func (server *WsServer) broadcastToClients(message []byte) {
 	for client := range server.clients {
-		fmt.Println(string(message))
 		client.send <- message
 	}
 }

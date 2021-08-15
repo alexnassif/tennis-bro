@@ -71,11 +71,9 @@ func newClient(conn *websocket.Conn, wsServer *WsServer, name string, user Model
 
 // ServeWs handles websocket requests from clients requests.
 func ServeWs(wsServer *WsServer, c *gin.Context) {
-	fmt.Println("we get this far")
-	usertok, ok := c.Keys["user"].(Models.LoggedInUser)
+	
+	usertok, _ := c.Keys["user"].(Models.LoggedInUser)
 
-	fmt.Print(ok)
-	fmt.Print(usertok.GetName(), usertok.GetId())
 	var user Models.User
 	err := Models.GetUserByID(&user, usertok.GetId())
 	if err != nil {

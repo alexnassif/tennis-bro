@@ -1,9 +1,7 @@
 package Auth
 
 import (
-	"fmt"
 	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,7 +27,6 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
 
 		if tok && len(token) == 1 {
 			user, err := ValidateToken(token[0])
-            fmt.Print(user.GetName(), user.GetId())
 			if err != nil {
 				http.Error(w, "Forbidden", http.StatusForbidden)
 
