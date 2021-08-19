@@ -1,10 +1,10 @@
 package Routes
 
 import (
-	
-	"github.com/gin-gonic/gin"
+	"github.com/alexnassif/tennis-bro/Auth"
 	"github.com/alexnassif/tennis-bro/Controllers"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
@@ -16,8 +16,12 @@ func SetupRouter() *gin.Engine {
 		userGroup.GET("user", Controllers.GetUsers)
 		userGroup.POST("user", Controllers.CreateUser)
 		userGroup.GET("user/:id", Controllers.GetUserByID)
-		userGroup.PUT("user/:id", Controllers.UpdateUser)
-		userGroup.DELETE("user/:id", Controllers.DeleteUser)
+		userGroup.PUT("user/:id", Auth.AuthMiddleware(func(c *gin.Context) {
+			Controllers.UpdateUser(c)
+		}))
+		userGroup.DELETE("user/:id", Auth.AuthMiddleware(func(c *gin.Context) {
+			Controllers.DeleteUser(c)
+		}))
 	}
 
 	roomGroup := r.Group("/room-api")
