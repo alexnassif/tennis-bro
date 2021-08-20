@@ -13,7 +13,11 @@ func SetupRouter() *gin.Engine {
 
 	userGroup := r.Group("/user-api")
 	{
-		userGroup.GET("user", Controllers.GetUsers)
+		//userGroup.GET("user", Controllers.GetUsers)
+
+		userGroup.GET("user", Auth.AuthMiddleware(func(c *gin.Context) {
+			Controllers.GetUsers(c)
+		}))
 		userGroup.POST("user", Controllers.CreateUser)
 		userGroup.GET("user/:id", Controllers.GetUserByID)
 		userGroup.PUT("user/:id", Auth.AuthMiddleware(func(c *gin.Context) {

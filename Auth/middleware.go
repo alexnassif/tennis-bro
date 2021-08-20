@@ -1,7 +1,9 @@
 package Auth
 
 import (
+	"fmt"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,6 +38,7 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
 			}
 
 		} else {
+			fmt.Print("in not tok")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Please login or provide name"))
 		}
