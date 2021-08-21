@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"strings"
 )
 
 type AnonUser struct {
@@ -37,9 +38,35 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
 			}
 
 		} else {
-			fmt.Print("in auth")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Please login or provide name"))
 		}
+	})
+}
+
+func AuthMiddlewareRest(f gin.HandlerFunc) gin.HandlerFunc {
+	return gin.HandlerFunc(func(c *gin.Context) {
+
+		r := c.Request
+		w := c.Writer
+		reqToken := r.Header.Get("Authorization")
+		
+		splitToken := strings.Split(reqToken, "Bearer")
+		if len(splitToken) != 2 {
+    		// Error: Bearer token not in proper format
+			http.Error(w, "Forbidden", http.StatusForbidden)
+		}
+
+		reqToken = strings.TrimSpace(splitToken[1])
+		
+		user, err := ValidateToken(reqToken)
+		if err != nil {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+
+		} else {
+			c.Set("user", user)
+			f(c)
+		}
+		
 	})
 }
