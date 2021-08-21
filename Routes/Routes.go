@@ -9,6 +9,11 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowHeaders = []string{"Authorization", "Origin"}
+	// config.AllowOrigins == []string{"http://google.com", "http://facebook.com"}
+
 	r.Use(cors.Default())
 
 	userGroup := r.Group("/user-api")

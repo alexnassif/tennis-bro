@@ -26,7 +26,6 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
 		r := c.Request
 		w := c.Writer
 		token, tok := r.URL.Query()["bearer"]
-
 		if tok && len(token) == 1 {
 			user, err := ValidateToken(token[0])
 			if err != nil {
@@ -38,7 +37,7 @@ func AuthMiddleware(f gin.HandlerFunc) gin.HandlerFunc {
 			}
 
 		} else {
-			fmt.Print("in not tok")
+			fmt.Print("in auth")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Please login or provide name"))
 		}
