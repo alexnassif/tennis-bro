@@ -24,7 +24,9 @@ func SetupRouter() *gin.Engine {
 			Controllers.GetUsers(c)
 		}))
 		userGroup.POST("user", Controllers.CreateUser)
-		userGroup.GET("user/:id", Controllers.GetUserByID)
+		userGroup.GET("user/:id", Auth.AuthMiddlewareRest(func(c *gin.Context) {
+			Controllers.GetUserByID(c)
+		}))
 		userGroup.PUT("user/:id", Auth.AuthMiddlewareRest(func(c *gin.Context) {
 			Controllers.UpdateUser(c)
 		}))
