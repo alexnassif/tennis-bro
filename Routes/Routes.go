@@ -37,12 +37,16 @@ func SetupRouter() *gin.Engine {
 
 	roomGroup := r.Group("/room-api")
 	{
-		roomGroup.GET("rooms/:id", Controllers.GetRoomsForUser)
+		roomGroup.GET("rooms/:id", Auth.AuthMiddlewareRest(func(c *gin.Context) {
+			Controllers.GetRoomsForUser(c)
+		}))
 	}
 
 	messageGroup := r.Group("/message-api")
 	{
-		messageGroup.GET("messages/:sender/:recipient", Controllers.GetMessagesByUserId)
+		messageGroup.GET("messages/:sender/:recipient", Auth.AuthMiddlewareRest(func(c *gin.Context) {
+			Controllers.GetMessagesByUserId(c)
+		}))
 	}
 	return r
 }
