@@ -11,12 +11,10 @@ func GetMessagesByUserId(c *gin.Context) {
 	recipient := c.Params.ByName("recipient")
 
 	usertok, ok := c.Keys["user"].(Models.LoggedInUser)
-	if !ok {
-		http.Error(c.Writer, "Forbidden", http.StatusForbidden)
-	}
 
-	if usertok.GetId() != sender {
+	if !ok || usertok.GetId() != sender {
 		http.Error(c.Writer, "Forbidden", http.StatusForbidden)
+		return
 	}
 
 	var messages []Models.Message
