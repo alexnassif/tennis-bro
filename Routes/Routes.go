@@ -10,15 +10,14 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
-	config.AllowHeaders = []string{"Authorization"}
-	// config.AllowOrigins == []string{"http://google.com", "http://facebook.com"}
+	config.AllowOrigins = []string{"http://localhost:3000"}
+	config.AllowHeaders = []string{"Authorization", "Content-Type"}
 
 	r.Use(cors.New(config))
+	
 
 	userGroup := r.Group("/user-api")
 	{
-		//userGroup.GET("user", Controllers.GetUsers)
 
 		userGroup.GET("user", Auth.AuthMiddlewareRest(func(c *gin.Context) {
 			Controllers.GetUsers(c)
