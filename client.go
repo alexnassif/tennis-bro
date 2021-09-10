@@ -71,7 +71,7 @@ func newClient(conn *websocket.Conn, wsServer *WsServer, name string, user Model
 
 // ServeWs handles websocket requests from clients requests.
 func ServeWs(wsServer *WsServer, c *gin.Context) {
-	
+
 	usertok, _ := c.Keys["user"].(Models.LoggedInUser)
 
 	var user Models.User
@@ -250,6 +250,7 @@ func (client *Client) handlePrivateMessage(message Message) {
 
 }
 
+//room between 2 users only
 func (client *Client) joinPrivateRoom(roomName string, sender Models.OnlineUser) *Room {
 
 	room := client.wsServer.createPrivateRoom(roomName, true)
