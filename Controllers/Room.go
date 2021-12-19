@@ -8,15 +8,15 @@ import (
 )
 
 func GetRoomsForUser(c *gin.Context) {
-	id := c.Params.ByName("id")
+	//id := c.Params.ByName("id")
 
 	usertok, ok := c.Keys["user"].(Models.LoggedInUser)
-	if !ok || usertok.GetId() != id {
+	if !ok  {
 		http.Error(c.Writer, "Forbidden", http.StatusForbidden)
 		return
 	}
 	var privateRooms []Models.Room
-	err := Models.GetRoomsByUsers(id, &privateRooms)
+	err := Models.GetRoomsByUsers(usertok.GetId(), &privateRooms)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {

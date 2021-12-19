@@ -84,3 +84,13 @@ func DeleteUser(c *gin.Context) {
 		}
 	}
 }
+
+func FetchUser(c *gin.Context){
+	usertok, ok := c.Keys["user"].(Models.LoggedInUser) 
+
+	if !ok {
+		http.Error(c.Writer, "Forbidden", http.StatusForbidden)
+	}else{
+		c.JSON(http.StatusOK, usertok)
+	}
+}

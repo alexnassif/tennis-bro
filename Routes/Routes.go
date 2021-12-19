@@ -14,7 +14,6 @@ func SetupRouter() *gin.Engine {
 	config.AllowHeaders = []string{"Authorization", "Content-Type"}
 
 	r.Use(cors.New(config))
-	
 
 	userGroup := r.Group("/user-api")
 	{
@@ -32,18 +31,21 @@ func SetupRouter() *gin.Engine {
 		userGroup.DELETE("user/:id", Auth.AuthMiddlewareRest(func(c *gin.Context) {
 			Controllers.DeleteUser(c)
 		}))
+		userGroup.GET("me", Auth.AuthMiddlewareRest(func(c *gin.Context) {
+			Controllers.FetchUser(c)
+		}))
 	}
 
 	roomGroup := r.Group("/room-api")
 	{
-		roomGroup.GET("rooms/:id", Auth.AuthMiddlewareRest(func(c *gin.Context) {
+		roomGroup.GET("rooms", Auth.AuthMiddlewareRest(func(c *gin.Context) {
 			Controllers.GetRoomsForUser(c)
 		}))
 	}
 
 	messageGroup := r.Group("/message-api")
 	{
-		messageGroup.GET("messages/:sender/:recipient", Auth.AuthMiddlewareRest(func(c *gin.Context) {
+		messageGroup.GET("messages/:recipient", Auth.AuthMiddlewareRest(func(c *gin.Context) {
 			Controllers.GetMessagesByUserId(c)
 		}))
 	}

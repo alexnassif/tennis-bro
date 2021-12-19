@@ -7,18 +7,18 @@ import(
 )
 
 func GetMessagesByUserId(c *gin.Context) {
-	sender := c.Params.ByName("sender")
+	//sender := c.Params.ByName("sender")
 	recipient := c.Params.ByName("recipient")
 
 	usertok, ok := c.Keys["user"].(Models.LoggedInUser)
 
-	if !ok || usertok.GetId() != sender {
+	if !ok  {
 		http.Error(c.Writer, "Forbidden", http.StatusForbidden)
 		return
 	}
 
 	var messages []Models.Message
-	err := Models.GetMessagesByUser(sender, recipient, &messages)
+	err := Models.GetMessagesByUser(usertok.GetId(), recipient, &messages)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 	   } else {
