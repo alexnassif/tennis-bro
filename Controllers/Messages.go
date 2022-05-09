@@ -1,8 +1,9 @@
 package Controllers
 
-import(
-	"github.com/alexnassif/tennis-bro/Models"
+import (
 	"net/http"
+
+	"github.com/alexnassif/tennis-bro/Models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +13,7 @@ func GetMessagesByUserId(c *gin.Context) {
 
 	usertok, ok := c.Keys["user"].(Models.LoggedInUser)
 
-	if !ok  {
+	if !ok {
 		http.Error(c.Writer, "Forbidden", http.StatusForbidden)
 		return
 	}
@@ -21,7 +22,8 @@ func GetMessagesByUserId(c *gin.Context) {
 	err := Models.GetMessagesByUser(usertok.GetId(), recipient, &messages)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
-	   } else {
+	} else {
 		c.JSON(http.StatusOK, messages)
-	   }
+	}
 }
+

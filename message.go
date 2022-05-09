@@ -34,7 +34,7 @@ func (message *Message) encode() []byte {
 	return json
 }
 
-func (message *Message) UnmarshalJSON(data []byte) error {
+/*func (message *Message) UnmarshalJSON(data []byte) error {
 	type Alias Message
 	msg := &struct {
 		Sender Client `json:"sender"`
@@ -47,4 +47,4 @@ func (message *Message) UnmarshalJSON(data []byte) error {
 	}
 	message.Sender = &msg.Sender
 	return nil
-}
+}*/
