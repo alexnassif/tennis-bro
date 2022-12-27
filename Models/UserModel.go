@@ -5,7 +5,8 @@ import (
 
 	"gorm.io/gorm"
 )
-type LoggedInUser interface{
+
+type LoggedInUser interface {
 	GetId() string
 	GetName() string
 }
@@ -17,7 +18,7 @@ type User struct {
 	Level    PlayerLevel `gorm:"embedded" json:"level"`
 	Image    string      `json:"image"`
 	Bio      string      `json:"bio"`
-	Password string      `json:"password"`
+	Password string      `json:"-"`
 }
 
 type PlayerLevel struct {
@@ -28,6 +29,7 @@ type PlayerLevel struct {
 type Location struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+	Zip       int     `json:"zip_code"`
 }
 
 func (user *User) GetId() string {
@@ -40,24 +42,18 @@ func (user *User) GetName() string {
 
 type OnlineUser interface {
 	GetId() string
-	GetName() string
 	GetUser() User
 }
 
 type OnlineClient struct {
-	ID       string `json:"id"`
-	UserName string `json:"name"`
-	UserID   int
-	User     User
+	ID string `json:"id"`
+	User
 }
 
 func (user *OnlineClient) GetId() string {
 	return user.ID
 }
 
-func (user *OnlineClient) GetName() string {
-	return user.UserName
-}
 func (user *OnlineClient) GetUser() User {
 	return user.User
 }

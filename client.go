@@ -51,7 +51,7 @@ type Client struct {
 	send     chan []byte
 	rooms    map[*Room]bool
 	Name     string `json:"name"`
-	User     Models.User
+	Models.User
 }
 
 func newClient(conn *websocket.Conn, wsServer *WsServer, name string, user Models.User, ID string) *Client {
@@ -77,7 +77,7 @@ func ServeWs(wsServer *WsServer, c *gin.Context) {
 	var user Models.User
 	err := Models.GetUserByID(&user, usertok.GetId())
 	if err != nil {
-		fmt.Println("no user with that id")
+		return
 	}
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -212,9 +212,7 @@ func (client *Client) handlePrivateMessage(message Message) {
 	var user Models.User
 	err := Models.GetUserByID(&user, fmt.Sprint(message.Receiver))
 	if err != nil {
-		fmt.Println("no user with that id")
-	} else {
-		fmt.Println(user.UserName)
+		return
 	}
 	var privateRoom Models.Room
 	result := Config.DB.Where("user1_id = ? AND user2_id = ?", user.ID, client.User.ID).Or("user1_id = ? AND user2_id = ?", client.User.ID, user.ID).First(&privateRoom)
@@ -225,12 +223,8 @@ func (client *Client) handlePrivateMessage(message Message) {
 		err := Config.DB.Create(&privateRoom)
 
 		if err.Error != nil {
-			fmt.Println(err.Error)
-		} else {
-			fmt.Println(privateRoom.User1.UserName)
+			return
 		}
-	} else {
-		fmt.Println(privateRoom.CreatedAt)
 	}
 
 	newMessage := Models.Message{Sender: client.User, Recipient: user, Body: message.Message}
@@ -250,7 +244,7 @@ func (client *Client) handlePrivateMessage(message Message) {
 
 }
 
-//room between 2 users only
+// room between 2 users only
 func (client *Client) joinPrivateRoom(roomName string, sender Models.OnlineUser) *Room {
 
 	room := client.wsServer.createPrivateRoom(roomName, true)
@@ -383,10 +377,6 @@ func (client *Client) notifyRoomJoined(room *Room, sender Models.OnlineUser) {
 
 func (client *Client) GetId() string {
 	return client.ID.String()
-}
-
-func (client *Client) GetName() string {
-	return client.Name
 }
 
 func (client *Client) GetUser() Models.User {

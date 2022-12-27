@@ -1,67 +1,68 @@
-
 package main
 
 import (
-	"fmt"
-	"github.com/google/uuid"
-	"github.com/alexnassif/tennis-bro/Config"
-	"log"
 	"context"
+	"fmt"
+	"log"
+
+	"github.com/alexnassif/tennis-bro/Config"
+	"github.com/google/uuid"
 )
+
 const welcomeMessage = "%s joined the room"
+
 var ctx = context.Background()
 
 type Room struct {
-
-	ID 			uuid.UUID `json:"id"`
-	Name 		string `json:"name"`
-	Private 	bool `json:"private"`
-	clients 	map[*Client]bool
-	register 	chan *Client
-	unregister 	chan *Client
-	broadcast 	chan *Message
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Private    bool      `json:"private"`
+	clients    map[*Client]bool
+	register   chan *Client
+	unregister chan *Client
+	broadcast  chan *Message
 }
 
-//create a new Room
+// create a new Room
 func NewRoom(name string, private bool) *Room {
 	fmt.Print(name)
 	return &Room{
-		ID: uuid.New(),
-		Name: name,
-		Private: private,
-		clients: make(map[*Client]bool),
-		register: make(chan *Client),
+		ID:         uuid.New(),
+		Name:       name,
+		Private:    private,
+		clients:    make(map[*Client]bool),
+		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		broadcast: make(chan *Message),
+		broadcast:  make(chan *Message),
 	}
 }
 
-//run room, accept various requests
-func (room *Room) RunRoom(){
+// run room, accept various requests
+func (room *Room) RunRoom() {
 
 	go room.suscribeToRoomMessages()
-	for{
-		select{
+	for {
+		select {
 		case client := <-room.register:
 			room.registerClientInRoom(client)
 		case client := <-room.unregister:
 			room.unregisterClientInRoom(client)
 		/*case message := <-room.broadcast:
-			room.broadcastToClientsInRoom(message.encode())*/
-		case message := <- room.broadcast:
+		room.broadcastToClientsInRoom(message.encode())*/
+		case message := <-room.broadcast:
 			room.publishRoomMessage(message.encode())
 		}
 	}
 }
 
-func (room *Room) registerClientInRoom(client *Client){
-	if !room.Private{
+func (room *Room) registerClientInRoom(client *Client) {
+	if !room.Private {
 		room.notifyClientJoined(client)
 	}
 	room.clients[client] = true
 }
 
-func (room *Room) unregisterClientInRoom(client *Client){
+func (room *Room) unregisterClientInRoom(client *Client) {
 	if _, ok := room.clients[client]; ok {
 		delete(room.clients, client)
 	}
@@ -93,7 +94,7 @@ func (room *Room) GetName() string {
 }
 
 func (room *Room) GetPrivate() bool {
-    return room.Private
+	return room.Private
 }
 
 func (room *Room) publishRoomMessage(message []byte) {
@@ -113,5 +114,3 @@ func (room *Room) suscribeToRoomMessages() {
 		room.broadcastToClientsInRoom([]byte(msg.Payload))
 	}
 }
-
-

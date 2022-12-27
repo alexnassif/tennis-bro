@@ -64,8 +64,7 @@ func (server *WsServer) Run() {
 
 func (server *WsServer) registerClient(client *Client) {
 	//add user to online table
-	fmt.Print("adding online user")
-	onlineUser := Models.OnlineClient{ID: client.User.GetId(), UserName: client.User.GetName()}
+	onlineUser := Models.OnlineClient{ID: client.User.GetId(), User: client.User}
 	Models.AddOnlineClient(&onlineUser)
 	//server.notifyClientJoined(client)
 	server.users = append(server.users, &onlineUser)
@@ -79,7 +78,7 @@ func (server *WsServer) unregisterClient(client *Client) {
 	if _, ok := server.clients[client]; ok {
 		delete(server.clients, client)
 		server.notifyClientLeft(client)
-		onlineUser := Models.OnlineClient{ID: client.User.GetId(), UserName: client.User.GetName()}
+		onlineUser := Models.OnlineClient{ID: client.User.GetId(), User: client.User}
 		Models.RemoveOnlineUser(&onlineUser)
 
 		server.publishClientLeft(client)
