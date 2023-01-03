@@ -88,7 +88,7 @@ func ServeWs(wsServer *WsServer, c *gin.Context) {
 	}
 
 	client := newClient(conn, wsServer, user.UserName, user, user.GetId())
-	client.joinPrivateRoom(user.GetId(), client)
+	//client.joinPrivateRoom(user.GetId(), client)
 
 	go client.writePump()
 	go client.readPump()
@@ -204,10 +204,14 @@ func (client *Client) handleNewMessage(jsonMessage []byte) {
 		client.handleJoinRoomPrivateMessage(message)
 	case PrivateMessage:
 		client.handlePrivateMessage(message)
+	case MessageSent:
+		client.handleMessageSent(message)
 	}
 
 }
+func(client *Client) handleMessageSent(message Message){
 
+}
 func (client *Client) handlePrivateMessage(message Message) {
 	var user Models.User
 	err := Models.GetUserByID(&user, fmt.Sprint(message.Receiver))
@@ -229,7 +233,6 @@ func (client *Client) handlePrivateMessage(message Message) {
 
 	newMessage := Models.Message{Sender: client.User, Recipient: user, Body: message.Message}
 	Config.DB.Create(&newMessage)
-
 	//find room by id
 	room := client.wsServer.findRoomByName(user.GetId())
 	if room == nil {

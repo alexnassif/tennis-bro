@@ -35,9 +35,7 @@ func NewWebsocketServer() *WsServer {
 		rooms:      make(map[*Room]bool),
 	}
 	var users []Models.OnlineClient
-
 	Models.GetAllOnlineUsers(&users)
-
 	wsServer.users = make([]Models.OnlineUser, 0)
 	for _, val := range users {
 		wsServer.users = append(wsServer.users, &val)
@@ -93,13 +91,16 @@ func (server *WsServer) broadcastToClients(message []byte) {
 
 func (server *WsServer) findRoomByName(name string) *Room {
 	var foundRoom *Room
-	fmt.Println("finding room" + name)
 	for room := range server.rooms {
 		if room.GetName() == name {
 			foundRoom = room
 			fmt.Println("break")
 			break
 		}
+	}
+
+	if foundRoom == nil {
+		foundRoom = server.runRoomFromRepository(name)
 	}
 
 	return foundRoom
@@ -134,7 +135,6 @@ func (server *WsServer) createPrivateRoom(name string, private bool) *Room {
 	room := NewRoom(name, private)
 	go room.RunRoom()
 	server.rooms[room] = true
-	fmt.Println("created room" + name)
 	return room
 }
 
@@ -242,6 +242,7 @@ func (server *WsServer) listenPubSubChannel() {
 
 func (server *WsServer) handleUserJoined(message Message) {
 	// Add the user to the slice
+	server.users = append(server.users, message.Sender)
 	server.broadcastToClients(message.encode())
 }
 
